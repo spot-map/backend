@@ -1,0 +1,66 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ridemap-api
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ridemap
+      DB_USERNAME: ridemap
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ridemap-network
+
+  postgres:
+    image: imresamu/postgis:17-3.5-bookworm
+    container_name: ridemap-postgres
+    restart: unless-stopped
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: ridemap
+      POSTGRES_USER: ridemap
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "5433:5432"
+    volumes:
+      - ridemap_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ridemap -d ridemap"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - ridemap-network
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: ridemap-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - ridemap_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - ridemap-network
+
+volumes:
+  ridemap_postgres_data:
+  ridemap_redis_data:
+
+networks:
+  ridemap-network:
+    driver: bridge
