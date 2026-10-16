@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ridemap
+    username: ridemap
+    password: local_ridemap_dev_password
+    driver-class-name: org.postgresql.Driver
+
+rustfs:
+  endpoint: http://localhost:9000
+  access-key: test-access-key
+  secret-key: test-secret-key
+  bucket: test-bucket

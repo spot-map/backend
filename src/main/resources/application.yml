@@ -34,6 +34,11 @@ spring:
       cache-null-values: false
       key-prefix: "ridemap::"
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
 
@@ -45,3 +50,16 @@ springdoc:
     display-request-duration: true
   api-docs:
     path: /v3/api-docs
+
+rustfs:
+  endpoint: ${RUSTFS_ENDPOINT:http://localhost:9000}
+  access-key: ${RUSTFS_ACCESS_KEY}
+  secret-key: ${RUSTFS_SECRET_KEY}
+  bucket: ${RUSTFS_BUCKET:spot-images}
+
+spot-images:
+  max-file-size: 10485760
+  allowed-content-types:
+    - image/jpeg
+    - image/png
+    - image/webp
